@@ -1,0 +1,105 @@
+﻿@page "/type"
+@inject IJSRuntime js
+@rendermode InteractiveWebAssembly
+@inject GuestService service
+
+
+<h3>RoomTypeList</h3>
+<NavLink class="nav-link" href="add">Add</NavLink>
+<br />
+<hr />
+<table class="table table-responsive table-striped table-hover">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Type Name</th>
+			<th>Price Per Night</th>
+			<th>Guest Details</th>
+			<th>Operation</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var type in data)
+		{
+
+			<tr>
+				<td>@type.RoomTypeId</td>
+				<td>@type.TypeName</td>
+				<td>@type.PricePerNight</td>
+				<td>
+					<ol>
+						@foreach (var guest in type.Guests)
+						{
+							<li>
+								<dl>
+									<dt>Name</dt>
+									<dd>@guest.FullName</dd>
+									<dt>Email</dt>
+									<dd>@guest.Email</dd>
+									<dt>PhoneNumber</dt>
+									<dd>@guest.PhoneNumber</dd>
+									<dt>DateOfBirth</dt>
+									<dd>
+										@guest.DateOfBirth.ToString("dd-MMM-yyyy")
+									</dd>
+									<dt>CheckInDate</dt>
+									<dd>@guest.CheckInDate</dd>
+									<dt>CheckOutDate</dt>
+									<dd>@guest.CheckOutDate</dd>								
+									<dt>IsCheckedOut?</dt>
+									<dd>
+										<InputCheckbox readonly @bind-Value="@guest.IsCheckedOut"/>
+									</dd>
+								</dl>
+							</li>
+						}
+					</ol>
+				</td>
+				<td class="btn-group">
+					<a class="nav-link btn btn-outline-info" href="/edit/@type.RoomTypeId">Edit</a>
+					<button class="btn btn-outline-danger" @onclick="()=> DeleteData(type)">
+						Delete
+					</button>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+
+
+@code {
+
+	private IList<RoomType>? data = new List<RoomType>();
+
+
+	protected override async Task OnInitializedAsync()
+	{
+
+		await loadData();
+
+	}
+
+	async Task loadData()
+	{
+		this.data = await this.service.GetAll();
+	}
+
+	async Task DeleteData(RoomType type)
+	{
+		var confirm = await js.InvokeAsync<bool>("confirm", $"delete data of {type.TypeName}?");
+
+		if (!confirm) return;
+
+
+		var result = await this.service.Delete(type.RoomTypeId);
+
+		if (result.IsSuccessStatusCode)
+		{
+			await loadData();
+		}
+	}
+
+
+
+}

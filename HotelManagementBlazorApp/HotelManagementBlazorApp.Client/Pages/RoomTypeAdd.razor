@@ -1,0 +1,140 @@
+﻿@page "/add"
+@rendermode InteractiveWebAssembly
+@inject GuestService service
+@inject NavigationManager nav
+
+<h3>RoomTypeAdd</h3>
+
+
+
+<EditForm Model="model" OnValidSubmit="SaveData">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+	@if (!string.IsNullOrEmpty(message))
+	{
+		<span class="text-danger text-lg-center">@message</span>
+	}
+	<div>
+		<label for="name">Type Name:</label>
+		<InputText id="name" class="form-control" required @bind-Value="model.TypeName" />
+		<ValidationMessage For="() => model.TypeName" />
+	</div>
+
+	<table class="table table-active table-bordered table-hover">
+		<tr>
+			<th>First Name</th>
+			<th>Last Name</th>
+			<th>Email</th>
+			<th>Phone Number</th>
+			<th>Date Of Birth</th>
+			<th>Check In Date</th>
+			<th>Check Out Date</th>
+			<th>Total Amount Paid</th>
+			<th>Payment Status</th>
+			<th>Is Checked Out</th>
+			<th>
+				<button type="button" class="btn btn-outline-info" @onclick="AddGuest">Add Guest</button>
+			</th>
+		</tr>
+		@foreach (var gst in model.Guests)
+		{
+            <tr>
+                <td>
+                    <InputText class="form-control" @bind-Value="gst.FirstName" />
+                    <ValidationMessage For="() => gst.FirstName" />
+                </td>
+                <td>
+                    <InputText class="form-control" @bind-Value="gst.LastName" />
+                    <ValidationMessage For="() => gst.LastName" />
+                </td>
+                <td>
+                    <InputText class="form-control" @bind-Value="gst.Email" />
+                    <ValidationMessage For="() => gst.Email" />
+                </td>
+                <td>
+                    <InputText class="form-control" @bind-Value="gst.PhoneNumber" />
+                    <ValidationMessage For="() => gst.PhoneNumber" />
+                </td>
+                <td>
+                    <InputDate @bind-Value="gst.DateOfBirth" />
+                    <ValidationMessage For="() => gst.DateOfBirth" />
+                </td>
+                <td>
+                    <InputDate @bind-Value="gst.CheckInDate" />
+                    <ValidationMessage For="() => gst.CheckInDate" />
+                </td>
+                <td>
+                    <InputDate @bind-Value="gst.CheckOutDate" />
+                    <ValidationMessage For="() => gst.CheckOutDate" />
+                </td>
+                <td>
+                    <InputNumber class="form-control" @bind-Value="gst.TotalAmountPaid" />
+                    <ValidationMessage For="() => gst.TotalAmountPaid" />
+                </td>
+                <td>
+                    <InputText class="form-control" @bind-Value="gst.PaymentStatus" />
+                    <ValidationMessage For="() => gst.PaymentStatus" />
+                </td>
+                <td>
+                    <InputCheckbox @bind-Value="gst.IsCheckedOut" />
+                    <ValidationMessage For="() => gst.IsCheckedOut" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-outline-warning" @onclick="() => DeleteGuest(gst)">Delete</button>
+                </td>
+            </tr>
+
+
+		}
+	</table>
+
+	<button type="submit" class="btn btn-outline-success">
+		Save
+	</button>
+	<NavLink class="btn btn-outline-info" href="type">
+		Cancel
+	</NavLink>
+</EditForm>
+
+
+
+
+
+@code {
+
+
+
+
+
+	private RoomType model = new RoomType();
+	int index = 0;
+
+
+	string? message;
+
+	public async Task SaveData()
+	{
+		var response = await service.Save(model);
+
+		if (response.IsSuccessStatusCode)
+		{
+			nav.NavigateTo("/type");
+		}
+		else
+		{
+			this.message = response.ReasonPhrase;
+			//response.Content
+		}
+	}
+
+	private void AddGuest()
+	{
+		model.Guests?.Add(new Guest());
+	}
+	private void DeleteGuest(Guest item)
+	{
+		model.Guests?.Remove(item);
+
+	}
+
+}
